@@ -9,6 +9,7 @@ const nextConfig = {
         name: 'host',
         remotes: {
           remote: `remote@http://localhost:3001/mf-manifest.json`,
+          remote2: `remote2@http://localhost:3002/mf-manifest.json`,
         },
         filename: 'static/chunks/remoteEntry.js',
         exposes: {},
