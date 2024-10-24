@@ -50,8 +50,6 @@
 
 
 
-
-
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 let storeModule: any = null;
@@ -59,53 +57,43 @@ let storeName: any =null;
 export default function Home() {
   const router = useRouter();
   const [count, setCount] = useState<number>(0);
-  const [isStoreLoaded, setIsStoreLoaded] = useState(false);
   const [nameStore, setNameStore] = useState<string>('');
-  const [isStoreName, setIsStoreName] = useState(false);
   const [inputValue, setInputValue] = useState('');
 
+  const loadStore = async () => {
+    if (!storeModule) {
+      const loaded = await import('remote/store');
+      storeModule = loaded.default;
+    }
+    setCount(storeModule.getState().count);
+    const unsubscribe = storeModule.subscribe((state: any) => {
+      setCount(state.count);
+    });
+    return () => {
+      unsubscribe();
+    };
+  };
+
+  
+  const loadStore2 = async () => {
+    if (!storeName) {
+      const loaded = await import('remote2/store');
+      storeName = loaded.default;
+    }
+    setNameStore(storeName.getState().name);
+    const unsubscribe = storeName.subscribe((state: any) => {
+      setNameStore(state.name);
+    });
+    return () => {
+      unsubscribe();
+    };
+  };
 
   useEffect(() => {
-    const loadStore = async () => {
-      if (!storeModule) {
-        const loaded = await import('remote/store');
-        storeModule = loaded.default;
-      }
-      setIsStoreLoaded(true);
-      setCount(storeModule.getState().count);
-
-      const unsubscribe = storeModule.subscribe((state: any) => {
-        setCount(state.count);
-      });
-
-      return () => {
-        unsubscribe();
-      };
-    };
-
     loadStore();
-  }, []);
-
-  useEffect(() => {
-    const loadStore2 = async () => {
-      if (!storeName) {
-        const loaded = await import('remote2/store');
-        storeName = loaded.default;
-      }
-      setIsStoreName(true);
-      setNameStore(storeName.getState().name);
-
-      const unsubscribe = storeName.subscribe((state: any) => {
-        setNameStore(state.name);
-      });
-
-      return () => {
-        unsubscribe();
-      };
-    };
-
     loadStore2();
   }, []);
+
 
   const increaseCount = () => {
     if (storeModule) {
@@ -125,14 +113,11 @@ export default function Home() {
     }
   }
 
-  if (!isStoreLoaded && !isStoreName) {
-    return <div>Loading...</div>;
-  }
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen p-8 pb-20 gap-8 sm:p-20 font-[family-name:var(--font-geist-sans)]">
  
-  <div><b>Using Dispatch Action from remote store</b></div>
+  <div><b>Using Dispatch Action from remote store1</b></div>
 
   <div>count: {count}</div>
 
